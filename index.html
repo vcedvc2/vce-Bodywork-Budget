@@ -498,7 +498,7 @@
     </div>
     <button class="btn btn-sm" onclick="syncNow()">↑ Sync</button>
     <button class="btn btn-sm" onclick="debugConnection()" style="background:rgba(234,179,8,.2);color:var(--amber)">Debug</button>
-    <button class="btn btn-sm" onclick="loadSheets()">↓ Load</button>
+    <button class="btn btn-sm" onclick="loadSheets(true)">↓ Load</button>
     <button class="btn btn-sm" onclick="document.getElementById('csv-i').click()">Import CSV</button>
     <input id="csv-i" type="file" accept=".csv" style="display:none" onchange="importCSV(this)" />
     <button class="btn btn-primary btn-sm" onclick="openAdd()">+ Add Repair</button>
@@ -798,11 +798,16 @@ function syncNow(){
   if(!URL){sp('ok','Saved locally');return;}
   sp('busy','Syncing…');
   const payload={action:'save_all',budget:BUDGET,
-    repairs:repairs.map(r=>({...r,preTaxEst:r.pe,
-      gstEst:r.gstE||'',pstEst:r.pstE||'',
+    repairs:repairs.map(r=>({
+      id:r.id, vanId:r.vanId, plate:r.plate, shop:r.shop, desc:r.desc,
+      preTaxEst:r.pe||'', gstEst:r.gstE||'', pstEst:r.pstE||'',
       totalEst:r.pe?(r.pe+(r.gstE||0)+(r.pstE||0)).toFixed(2):'',
-      preTaxAct:r.pa,gstAct:r.gstA||'',pstAct:r.pstA||'',
-      totalAct:r.pa?(r.pa+(r.gstA||0)+(r.pstA||0)).toFixed(2):''})),
+      preTaxAct:r.pa||'', gstActAmt:r.gstA||'', pstActAmt:r.pstA||'',
+      totalAct:r.pa?(r.pa+(r.gstA||0)+(r.pstA||0)).toFixed(2):'',
+      status:r.status||'', funding:r.funding||'', date:r.date||'',
+      notes:r.notes||'', fixedAt:r.fixedAt||'',
+      gstE:r.gstE||'', pstE:r.pstE||'', gstA:r.gstA||'', pstA:r.pstA||''
+    })),
     fleet};
   fetch(URL,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}})
     .then(r=>r.text())
@@ -812,72 +817,77 @@ function syncNow(){
     })
     .catch(()=>sp('err','Sync failed'));
 }
-function loadSheets(){
-  if(!URL){sp('err','No URL');renderAll();return;}
+// Parse a repair row from sheet into app format
+function parseRepair(r){
+  const n=v=>(v!==null&&v!==''&&v!==undefined&&!isNaN(parseFloat(v)))?parseFloat(v):null;
+  const s=v=>(v!=null&&v!==''&&v!=='null')?String(v):'';
+  return {
+    id:r.id?+r.id:0,
+    vanId:s(r.vanId), plate:s(r.plate), shop:s(r.shop),
+    desc:s(r.desc), status:s(r.status)||'Waiting for Estimate',
+    funding:s(r.funding), date:s(r.date), notes:s(r.notes),
+    fixedAt:r.fixedAt&&r.fixedAt!=='null'&&r.fixedAt!==''?s(r.fixedAt):null,
+    pe:n(r.preTaxEst), pa:n(r.preTaxAct),
+    gstE:n(r.gstE), pstE:n(r.pstE),
+    gstA:n(r.gstA), pstA:n(r.pstA)
+  };
+}
+
+// forceLoad=true when user clicks Load button (always use sheet data)
+// forceLoad=false on startup (only use sheet if localStorage is empty)
+function loadSheets(forceLoad){
+  if(!URL){sp('err','No URL');return;}
   sp('busy','Loading…');
-  // Use JSONP to bypass CORS — works from local files and any domain
   const cbName='vce_cb_'+Date.now();
   window[cbName]=function(d){
     delete window[cbName];
     const s=document.getElementById('jsonp-script');if(s)s.remove();
     if(d&&d.ok){
-      if(d.repairs&&d.repairs.length) repairs=d.repairs.map(r=>{
-        const n=v=>v!==null&&v!==''&&v!==undefined&&!isNaN(parseFloat(v))?parseFloat(v):null;
-        const str=v=>v!=null?String(v):'';
-        return {...r,
-          id:r.id?+r.id:0,
-          vanId:str(r.vanId),
-          plate:str(r.plate),
-          shop:str(r.shop),
-          desc:str(r.desc),
-          status:str(r.status)||'Waiting for Estimate',
-          funding:str(r.funding),
-          date:str(r.date),
-          notes:str(r.notes),
-          fixedAt:r.fixedAt?str(r.fixedAt):null,
-          pe:n(r.preTaxEst)!=null?n(r.preTaxEst):n(r.pe),
-          pa:n(r.preTaxAct)!=null?n(r.preTaxAct):n(r.pa),
-          gstE:n(r.gstE),pstE:n(r.pstE),
-          gstA:n(r.gstA),pstA:n(r.pstA)};
-      });
-      if(d.fleet&&d.fleet.length){
-        const mapped=d.fleet.map(f=>({...f,score:+f.score}));
-        // Only use sheet fleet if it has valid grade data
-        if(mapped.some(f=>f.grade&&f.grade.includes('Poor')||f.grade&&f.grade.includes('Fair')||f.grade&&f.grade.includes('Great'))){
-          fleet=mapped;
-        }
-        // else keep FD default data
-      }
-      if(d.budget){BUDGET=+d.budget;$el('bi',BUDGET,'value');}
-      saveL();renderAll();sp('ok','Synced ✓');
-      // If sheet had no fleet grades, push local fleet data up
-      if(!d.fleet||!d.fleet.length||!d.fleet.some(f=>f.grade)){
+      // ── NEW LOGIC: Sheet is always source of truth ─────────────────────
+      const sheetHasRepairs = d.repairs && d.repairs.length > 0;
+      if (sheetHasRepairs) {
+        repairs = d.repairs.map(parseRepair);
+      } else if (repairs.length > 0) {
+        // First run or sheet was cleared → push our data up
+        sp('busy','First run — pushing data to sheet…');
         setTimeout(syncNow,500);
       }
+      // Fleet (unchanged)
+      if(d.fleet&&d.fleet.length){
+        const mapped=d.fleet.map(f=>({...f,score:+f.score}));
+        if(mapped.some(f=>f.grade&&(f.grade.includes('Poor')||f.grade.includes('Fair')||f.grade.includes('Great')))){
+          fleet=mapped;
+        }
+      }
+      // Budget always taken from sheet (shared)
+      if(d.budget){ BUDGET=+d.budget; $el('bi',BUDGET,'value'); }
+
+      saveL();
+      renderAll();
+      sp('ok','Synced ✓ '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));
+      if(forceLoad) toast('Loaded from Google Sheets','ok');
     } else {
-      sp('err','Load failed');renderAll();
-      toast((d&&d.error)||'Load failed','err');
+      sp('err','Sheet error');
+      renderAll();
     }
   };
-  // Timeout if no response in 8 seconds
   const t=setTimeout(()=>{
     if(window[cbName]){
       delete window[cbName];
-      sp('err','Timeout — check deployment');
+      sp('err','Timeout');
       renderAll();
     }
-  },8000);
+  },10000);
   const scr=document.createElement('script');
   scr.id='jsonp-script';
   scr.src=URL+'?action=load&callback='+cbName;
   scr.onerror=()=>{
     clearTimeout(t);delete window[cbName];
-    sp('err','Not connected');renderAll();
-    toast('Could not reach Google Sheets. Make sure deployment is set to Anyone.','err');
+    sp('err','Not connected');
+    renderAll();
   };
   document.head.appendChild(scr);
 }
-
 function st(){
   const p1=fleet.filter(f=>f.grade==='1-Poor').length,p2=fleet.filter(f=>f.grade==='2-Poor').length;
   const fa=fleet.filter(f=>f.grade==='3-Fair').length,gr=fleet.filter(f=>f.grade==='5-Great').length;
@@ -1281,14 +1291,18 @@ document.getElementById('import-modal').addEventListener('click',e=>{if(e.target
 function safeRender(){if(document.getElementById('page-dashboard').classList.contains('active'))renderAll();}
 loadL();
 loadYearData();
-// URL hardcoded — skip setup, go straight to dashboard
+// Skip setup, show dashboard
 const _sp=document.getElementById('setup-page');if(_sp)_sp.style.display='none';
 document.getElementById('page-dashboard').classList.add('active');
-renderAll(); // render local hardcoded data immediately so screen isn't blank
-sp('busy','Connecting…');
-setTimeout(function(){
-  loadSheets(); // load from sheet, then auto-sync if sheet fleet is empty
-},300);
+// If we have local data, render it immediately
+if(repairs&&repairs.length>0){
+  renderAll();
+  sp('ok','Local data loaded');
+} else {
+  sp('busy','Loading…');
+}
+// Always sync with sheet on startup (non-force — keeps local data if present)
+setTimeout(function(){ loadSheets(false); }, 400);
 </script>
 
 <datalist id="fund-dl"><option>Johnny's</option><option>FIF</option><option>ICBC Claim + FIF</option><option>ICBC Claim</option></datalist>
