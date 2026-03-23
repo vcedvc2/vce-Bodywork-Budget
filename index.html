@@ -497,6 +497,7 @@
       <span style="font-size:10px;color:var(--muted)">CAD</span>
     </div>
     <button class="btn btn-sm" onclick="syncNow()">↑ Sync</button>
+    <button class="btn btn-sm" onclick="debugConnection()" style="background:rgba(234,179,8,.2);color:var(--amber)">Debug</button>
     <button class="btn btn-sm" onclick="loadSheets()">↓ Load</button>
     <button class="btn btn-sm" onclick="document.getElementById('csv-i').click()">Import CSV</button>
     <input id="csv-i" type="file" accept=".csv" style="display:none" onchange="importCSV(this)" />
@@ -506,7 +507,7 @@
 <div id="ybanner" style="display:none;background:rgba(234,179,8,.1);border-bottom:1px solid rgba(234,179,8,.2);padding:7px 20px;align-items:center;justify-content:space-between;font-size:12px;color:var(--amber)"></div>
 
 <!-- SETUP -->
-<div id="setup-page" class="setup-wrap">
+<div id="setup-page" class="setup-wrap" style="display:none">
   <div class="setup-card">
     <div class="setup-logo">
       <img src="https://vcedvc2.github.io/vce-dispatch-portal/logo.png" onerror="this.style.display='none'" alt="" style="width:28px" />
@@ -531,7 +532,7 @@
 </div>
 
 <!-- DASHBOARD -->
-<div id="page-dashboard" class="page">
+<div id="page-dashboard" class="page active">
   <div class="kpi-grid">
     <div class="kpi"><div class="kpi-label">Poor Grade 1</div><div class="kpi-val" id="k1" style="color:var(--red)">—</div><div class="kpi-sub">Critical · grounding risk</div></div>
     <div class="kpi"><div class="kpi-label">Poor Grade 2</div><div class="kpi-val" id="k2" style="color:var(--orange)">—</div><div class="kpi-sub">At risk of grounding</div></div>
@@ -709,7 +710,7 @@
 
 <script>
 const GST=0.05,PST=0.07;
-let BUDGET=60000,URL='',editId=null,rQ='',fQ='',gF='all',syncT=null;
+let BUDGET=60000,URL='https://script.google.com/macros/s/AKfycbzKKjfYRACpgnNwJGlUYTnBV0T2ct4bp_TJxBmWLO4_lgzWidLjTecrVKKGwnJgKabjaA/exec',editId=null,rQ='',fQ='',gF='all',syncT=null;
 let cG,cC,cB,cP;
 
 const FD=[{"vanId":"PF192","plate":"VT7992","ymm":"2021 Ford Transit","grade":"1-Poor","score":29},{"vanId":"F112","plate":"SA8312","ymm":"2021 Ford Transit","grade":"1-Poor","score":29},{"vanId":"AF86","plate":"RW7986","ymm":"2021 Ford Transit","grade":"1-Poor","score":31},{"vanId":"PF191","plate":"VT7991","ymm":"2021 Ford Transit","grade":"1-Poor","score":31},{"vanId":"F109","plate":"SA8309","ymm":"2021 Ford Transit","grade":"1-Poor","score":32},{"vanId":"AF68","plate":"SA8308","ymm":"2021 Ford Transit","grade":"1-Poor","score":32},{"vanId":"F111","plate":"SA8311","ymm":"2021 Ford Transit","grade":"1-Poor","score":38},{"vanId":"F91","plate":"RW7991","ymm":"2021 Ford Transit","grade":"1-Poor","score":40},{"vanId":"AF89","plate":"RW7989","ymm":"2021 Ford Transit","grade":"2-Poor","score":4},{"vanId":"AR77","plate":"RW7977","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":11},{"vanId":"AF66","plate":"SA8306","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"F120","plate":"SA8320","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"AF65","plate":"SA8305","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"F115","plate":"SA8315","ymm":"2021 Ford Transit","grade":"2-Poor","score":15},{"vanId":"AF67","plate":"SA8307","ymm":"2021 Ford Transit","grade":"2-Poor","score":15},{"vanId":"F110","plate":"SA8310","ymm":"2021 Ford Transit","grade":"2-Poor","score":16},{"vanId":"PR182","plate":"VK4782","ymm":"2022 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"PR183","plate":"VK4783","ymm":"2022 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"AR84","plate":"RW7984","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"F116","plate":"SA8316","ymm":"2021 Ford Transit","grade":"2-Poor","score":19},{"vanId":"AR81","plate":"RW7981","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":19},{"vanId":"AR78","plate":"RW7978","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":19},{"vanId":"AF63","plate":"SA8303","ymm":"2021 Ford Transit","grade":"2-Poor","score":20},{"vanId":"F119","plate":"SA8319","ymm":"2021 Ford Transit","grade":"2-Poor","score":21},{"vanId":"F117","plate":"SA8317","ymm":"2021 Ford Transit","grade":"2-Poor","score":22},{"vanId":"F118","plate":"SA8318","ymm":"2021 Ford Transit","grade":"2-Poor","score":22},{"vanId":"AF85","plate":"RW7985","ymm":"2021 Ford Transit","grade":"2-Poor","score":23},{"vanId":"F113","plate":"SA8313","ymm":"2021 Ford Transit","grade":"2-Poor","score":24},{"vanId":"AR82","plate":"RW7982","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":25},{"vanId":"AF88","plate":"RW7988","ymm":"2021 Ford Transit","grade":"2-Poor","score":25},{"vanId":"AR76","plate":"RW7976","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":26},{"vanId":"PF190","plate":"VT7990","ymm":"2021 Ford Transit","grade":"2-Poor","score":27},{"vanId":"L13","plate":"WP5601","ymm":"2024 Ford Transit","grade":"3-Fair","score":4},{"vanId":"","plate":"WK2839","ymm":"2024 Ford Transit","grade":"3-Fair","score":4},{"vanId":"AR75","plate":"RW7975","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":9},{"vanId":"AF87","plate":"RW7987","ymm":"2021 Ford Transit","grade":"3-Fair","score":11},{"vanId":"PR189","plate":"VT7989","ymm":"2022 Ram ProMaster","grade":"3-Fair","score":12},{"vanId":"F114","plate":"SA8314","ymm":"2021 Ford Transit","grade":"3-Fair","score":14},{"vanId":"AR79","plate":"RW7979","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":14},{"vanId":"AR80","plate":"RW7980","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":17},{"vanId":"R-128","plate":"VK4908","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"L14","plate":"WP5602","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"","plate":"WE6360","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"PR184","plate":"VK4784","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"R-126","plate":"SS5046","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"R-121","plate":"SS5041","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"L12","plate":"WK2840","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"L15","plate":"WK2833","ymm":"2024 Ford Transit","grade":"5-Great","score":1}];
@@ -770,7 +771,14 @@ function connectSheets(){
       catch(e){ throw new Error('Invalid response — check your Web App URL and deployment settings'); }
       if(d.ok){
         if(d.repairs&&d.repairs.length) repairs=d.repairs.map(r=>({...r,id:+r.id,pe:r.preTaxEst?+r.preTaxEst:null,pa:r.preTaxAct?+r.preTaxAct:null,gstE:r.gstE?+r.gstE:null,pstE:r.pstE?+r.pstE:null,gstA:r.gstA?+r.gstA:null,pstA:r.pstA?+r.pstA:null}));
-        if(d.fleet&&d.fleet.length) fleet=d.fleet.map(f=>({...f,score:+f.score}));
+        if(d.fleet&&d.fleet.length){
+        const mapped=d.fleet.map(f=>({...f,score:+f.score}));
+        // Only use sheet fleet if it has valid grade data
+        if(mapped.some(f=>f.grade&&f.grade.includes('Poor')||f.grade&&f.grade.includes('Fair')||f.grade&&f.grade.includes('Great'))){
+          fleet=mapped;
+        }
+        // else keep FD default data
+      }
         if(d.budget){ BUDGET=+d.budget; const bi=document.getElementById('bi'); if(bi)bi.value=BUDGET; }
         saveL(); sp('ok','Connected ✓'); showApp(); toast('Connected! Data loaded.','ok');
       } else {
@@ -786,31 +794,88 @@ function showApp(){
   renderAll();
 }
 function syncNow(){
-  saveL();if(!URL){sp('ok','Saved locally');return;}
+  saveL();
+  if(!URL){sp('ok','Saved locally');return;}
   sp('busy','Syncing…');
   const payload={action:'save_all',budget:BUDGET,
-    repairs:repairs.map(r=>({...r,preTaxEst:r.pe,gstEst:r.pe?(r.pe*GST).toFixed(2):'',pstEst:r.pe?(r.pe*PST).toFixed(2):'',totalEst:r.pe?(r.pe*(1+GST+PST)).toFixed(2):'',preTaxAct:r.pa,gstAct:r.pa?(r.pa*GST).toFixed(2):'',pstAct:r.pa?(r.pa*PST).toFixed(2):'',totalAct:r.pa?(r.pa*(1+GST+PST)).toFixed(2):''})),fleet};
-  // Google Apps Script requires text/plain content type for POST (not application/json)
+    repairs:repairs.map(r=>({...r,preTaxEst:r.pe,
+      gstEst:r.gstE||'',pstEst:r.pstE||'',
+      totalEst:r.pe?(r.pe+(r.gstE||0)+(r.pstE||0)).toFixed(2):'',
+      preTaxAct:r.pa,gstAct:r.gstA||'',pstAct:r.pstA||'',
+      totalAct:r.pa?(r.pa+(r.gstA||0)+(r.pstA||0)).toFixed(2):''})),
+    fleet};
   fetch(URL,{method:'POST',body:JSON.stringify(payload),headers:{'Content-Type':'text/plain'}})
-    .then(r=>r.text()).then(txt=>{
-      try{const d=JSON.parse(txt);if(d.ok){sp('ok','Synced ✓ '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));}else{sp('err','Sync failed: '+d.error);}}
-      catch(e){sp('ok','Synced ✓');}  // GAS sometimes returns redirect, treat as success
-    }).catch(()=>{sp('err','Sync failed');saveL();});
-}
-function loadSheets(){
-  if(!URL){toast('Not connected','err');return;}sp('busy','Loading…');
-  fetch(URL+'?action=load')
     .then(r=>r.text())
     .then(txt=>{
-      let d; try{ d=JSON.parse(txt); }catch(e){ sp('err','Parse error'); return; }
-      if(d.ok){
-        if(d.repairs&&d.repairs.length) repairs=d.repairs.map(r=>({...r,id:+r.id,pe:r.preTaxEst?+r.preTaxEst:null,pa:r.preTaxAct?+r.preTaxAct:null,gstE:r.gstE?+r.gstE:null,pstE:r.pstE?+r.pstE:null,gstA:r.gstA?+r.gstA:null,pstA:r.pstA?+r.pstA:null}));
-        if(d.fleet&&d.fleet.length) fleet=d.fleet.map(f=>({...f,score:+f.score}));
-        if(d.budget){ BUDGET=+d.budget; const bi=document.getElementById('bi'); if(bi)bi.value=BUDGET; }
-        saveL(); renderAll(); sp('ok','Loaded ✓'); toast('Loaded from Google Sheets','ok');
-      } else { sp('err','Load failed'); toast(d.error||'Load failed','err'); }
+      try{const d=JSON.parse(txt);if(d.ok)sp('ok','Synced ✓ '+new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}));else sp('err','Sync failed');}
+      catch(e){sp('ok','Synced ✓');}
     })
-    .catch(e=>{ sp('err','Load failed'); toast(e.message,'err'); });
+    .catch(()=>sp('err','Sync failed'));
+}
+function loadSheets(){
+  if(!URL){sp('err','No URL');renderAll();return;}
+  sp('busy','Loading…');
+  // Use JSONP to bypass CORS — works from local files and any domain
+  const cbName='vce_cb_'+Date.now();
+  window[cbName]=function(d){
+    delete window[cbName];
+    const s=document.getElementById('jsonp-script');if(s)s.remove();
+    if(d&&d.ok){
+      if(d.repairs&&d.repairs.length) repairs=d.repairs.map(r=>{
+        const n=v=>v!==null&&v!==''&&v!==undefined&&!isNaN(parseFloat(v))?parseFloat(v):null;
+        const str=v=>v!=null?String(v):'';
+        return {...r,
+          id:r.id?+r.id:0,
+          vanId:str(r.vanId),
+          plate:str(r.plate),
+          shop:str(r.shop),
+          desc:str(r.desc),
+          status:str(r.status)||'Waiting for Estimate',
+          funding:str(r.funding),
+          date:str(r.date),
+          notes:str(r.notes),
+          fixedAt:r.fixedAt?str(r.fixedAt):null,
+          pe:n(r.preTaxEst)!=null?n(r.preTaxEst):n(r.pe),
+          pa:n(r.preTaxAct)!=null?n(r.preTaxAct):n(r.pa),
+          gstE:n(r.gstE),pstE:n(r.pstE),
+          gstA:n(r.gstA),pstA:n(r.pstA)};
+      });
+      if(d.fleet&&d.fleet.length){
+        const mapped=d.fleet.map(f=>({...f,score:+f.score}));
+        // Only use sheet fleet if it has valid grade data
+        if(mapped.some(f=>f.grade&&f.grade.includes('Poor')||f.grade&&f.grade.includes('Fair')||f.grade&&f.grade.includes('Great'))){
+          fleet=mapped;
+        }
+        // else keep FD default data
+      }
+      if(d.budget){BUDGET=+d.budget;$el('bi',BUDGET,'value');}
+      saveL();renderAll();sp('ok','Synced ✓');
+      // If sheet had no fleet grades, push local fleet data up
+      if(!d.fleet||!d.fleet.length||!d.fleet.some(f=>f.grade)){
+        setTimeout(syncNow,500);
+      }
+    } else {
+      sp('err','Load failed');renderAll();
+      toast((d&&d.error)||'Load failed','err');
+    }
+  };
+  // Timeout if no response in 8 seconds
+  const t=setTimeout(()=>{
+    if(window[cbName]){
+      delete window[cbName];
+      sp('err','Timeout — check deployment');
+      renderAll();
+    }
+  },8000);
+  const scr=document.createElement('script');
+  scr.id='jsonp-script';
+  scr.src=URL+'?action=load&callback='+cbName;
+  scr.onerror=()=>{
+    clearTimeout(t);delete window[cbName];
+    sp('err','Not connected');renderAll();
+    toast('Could not reach Google Sheets. Make sure deployment is set to Anyone.','err');
+  };
+  document.head.appendChild(scr);
 }
 
 function st(){
@@ -1047,7 +1112,7 @@ function saveRepair(){
 }
 
 function dlBackend(){
-  const code=`// VCE LOGISTICS Backend — paste into script.google.com\nfunction getOrCreateSheet(){const p=PropertiesService.getScriptProperties();let id=p.getProperty('SID');if(id){try{return SpreadsheetApp.openById(id);}catch(e){}}const ss=SpreadsheetApp.create('VCE Fleet Data');p.setProperty('SID',ss.getId());const rs=ss.getActiveSheet();rs.setName('Repairs');rs.getRange(1,1,1,18).setValues([['id','vanId','plate','shop','desc','preTaxEst','gstEst','pstEst','totalEst','preTaxAct','gstActAmt','pstActAmt','totalAct','status','funding','date','notes','fixedAt','gstE','pstE','gstA','pstA']]);rs.getRange(1,1,1,18).setFontWeight('bold').setBackground('#1A2744').setFontColor('#FFFFFF');ss.insertSheet('Fleet PAVE Data');const fs=ss.getSheetByName('Fleet PAVE Data');fs.getRange(1,1,1,5).setValues([['vanId','plate','ymm','grade','score']]);fs.getRange(1,1,1,5).setFontWeight('bold').setBackground('#1A2744').setFontColor('#FFFFFF');ss.insertSheet('Settings');const st=ss.getSheetByName('Settings');st.getRange(1,1,2,2).setValues([['key','value'],['budget','60000']]);return ss;}\nfunction cr(d){return ContentService.createTextOutput(JSON.stringify(d)).setMimeType(ContentService.MimeType.JSON);}\nfunction doGet(e){const ss=getOrCreateSheet();const r=s2o(ss.getSheetByName('Repairs'));const f=s2o(ss.getSheetByName('Fleet PAVE Data'));const st=s2o(ss.getSheetByName('Settings'));const b=st.find(x=>x.key==='budget');return cr({ok:true,repairs:r,fleet:f,budget:b?parseFloat(b.value):60000});}\nfunction doPost(e){const body=JSON.parse(e.postData.contents);const ss=getOrCreateSheet();if(body.action==='save_all'){ow(ss.getSheetByName('Repairs'),body.repairs,['id','vanId','plate','shop','desc','preTaxEst','gstEst','pstEst','totalEst','preTaxAct','gstActAmt','pstActAmt','totalAct','status','funding','date','notes','fixedAt','gstE','pstE','gstA','pstA']);ow(ss.getSheetByName('Fleet PAVE Data'),body.fleet,['vanId','plate','ymm','grade','score']);const st=ss.getSheetByName('Settings');const d=s2o(st);const row=d.findIndex(r=>r.key==='budget');if(row>=0)st.getRange(row+2,2).setValue(body.budget);else st.appendRow(['budget',body.budget]);return cr({ok:true});}return cr({ok:false,error:'Unknown'});}\nfunction s2o(sheet){const d=sheet.getDataRange().getValues();if(d.length<2)return[];const h=d[0];return d.slice(1).map(row=>{const o={};h.forEach((k,i)=>{o[k]=row[i]===''?null:row[i];});return o;});}\nfunction ow(sheet,rows,headers){const l=sheet.getLastRow();if(l>1)sheet.getRange(2,1,l-1,sheet.getLastColumn()).clearContent();if(!rows||!rows.length)return;const v=rows.map(r=>headers.map(h=>r[h]!=null?r[h]:''));sheet.getRange(2,1,v.length,headers.length).setValues(v);}`;
+  const code=`// VCE LOGISTICS Backend — paste into script.google.com\nfunction getOrCreateSheet(){const p=PropertiesService.getScriptProperties();let id=p.getProperty('SID');if(id){try{return SpreadsheetApp.openById(id);}catch(e){}}const ss=SpreadsheetApp.create('VCE Fleet Data');p.setProperty('SID',ss.getId());const rs=ss.getActiveSheet();rs.setName('Repairs');rs.getRange(1,1,1,18).setValues([['id','vanId','plate','shop','desc','preTaxEst','gstEst','pstEst','totalEst','preTaxAct','gstActAmt','pstActAmt','totalAct','status','funding','date','notes','fixedAt','gstE','pstE','gstA','pstA']]);rs.getRange(1,1,1,18).setFontWeight('bold').setBackground('#1A2744').setFontColor('#FFFFFF');ss.insertSheet('Fleet PAVE Data');const fs=ss.getSheetByName('Fleet PAVE Data');fs.getRange(1,1,1,5).setValues([['vanId','plate','ymm','grade','score']]);fs.getRange(1,1,1,5).setFontWeight('bold').setBackground('#1A2744').setFontColor('#FFFFFF');ss.insertSheet('Settings');const st=ss.getSheetByName('Settings');st.getRange(1,1,2,2).setValues([['key','value'],['budget','60000']]);return ss;}\nfunction cr(d){return ContentService.createTextOutput(JSON.stringify(d)).setMimeType(ContentService.MimeType.JSON);}\nfunction doGet(e){const ss=getOrCreateSheet();const r=s2o(ss.getSheetByName('Repairs'));const f=s2o(ss.getSheetByName('Fleet PAVE Data'));const st=s2o(ss.getSheetByName('Settings'));const b=st.find(x=>x.key==='budget');const data={ok:true,repairs:r,fleet:f,budget:b?parseFloat(b.value):60000};const cb=e&&e.parameter&&e.parameter.callback;if(cb){return ContentService.createTextOutput(cb+'('+JSON.stringify(data)+')').setMimeType(ContentService.MimeType.JAVASCRIPT);}return cr(data);}\nfunction doPost(e){const body=JSON.parse(e.postData.contents);const ss=getOrCreateSheet();if(body.action==='save_all'){ow(ss.getSheetByName('Repairs'),body.repairs,['id','vanId','plate','shop','desc','preTaxEst','gstEst','pstEst','totalEst','preTaxAct','gstActAmt','pstActAmt','totalAct','status','funding','date','notes','fixedAt','gstE','pstE','gstA','pstA']);ow(ss.getSheetByName('Fleet PAVE Data'),body.fleet,['vanId','plate','ymm','grade','score']);const st=ss.getSheetByName('Settings');const d=s2o(st);const row=d.findIndex(r=>r.key==='budget');if(row>=0)st.getRange(row+2,2).setValue(body.budget);else st.appendRow(['budget',body.budget]);return cr({ok:true});}return cr({ok:false,error:'Unknown'});}\nfunction s2o(sheet){const d=sheet.getDataRange().getValues();if(d.length<2)return[];const h=d[0];return d.slice(1).map(row=>{const o={};h.forEach((k,i)=>{o[k]=row[i]===''?null:row[i];});return o;});}\nfunction ow(sheet,rows,headers){const l=sheet.getLastRow();if(l>1)sheet.getRange(2,1,l-1,sheet.getLastColumn()).clearContent();if(!rows||!rows.length)return;const v=rows.map(r=>headers.map(h=>r[h]!=null?r[h]:''));sheet.getRange(2,1,v.length,headers.length).setValues(v);}`;
   const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(code);a.download='VCE_Backend.gs';a.click();
 }
 
@@ -1157,6 +1222,56 @@ function deleteArchive(year){
   toast('Archive deleted','err');
 }
 
+function debugConnection(){
+  const out=[];
+  out.push('URL: '+URL.slice(0,60)+'...');
+  out.push('Repairs in memory: '+repairs.length);
+  out.push('Fleet in memory: '+fleet.length);
+  out.push('Budget: '+BUDGET);
+  out.push('');
+  out.push('Testing JSONP fetch...');
+
+  const cbName='vce_debug_'+Date.now();
+  window[cbName]=function(d){
+    delete window[cbName];
+    const s=document.getElementById('jsonp-script');if(s)s.remove();
+    out.push('Response received!');
+    out.push('ok: '+d.ok);
+    out.push('repairs from sheet: '+(d.repairs?d.repairs.length:'none'));
+    if(d.repairs&&d.repairs[1]){
+      const r=d.repairs[1];
+      out.push('Sample repair preTaxEst='+r.preTaxEst+' pe='+r.pe+' status='+r.status);
+    }
+    out.push('fleet from sheet: '+(d.fleet?d.fleet.length:'none'));
+    out.push('budget from sheet: '+d.budget);
+    if(d.error) out.push('ERROR: '+d.error);
+    alert(out.join('\n'));
+  };
+  setTimeout(function(){
+    if(window[cbName]){
+      delete window[cbName];
+      out.push('TIMEOUT - no response after 8 seconds');
+      out.push('');
+      out.push('Possible causes:');
+      out.push('1. Backend not deployed yet');
+      out.push('2. Deployment not set to Anyone');
+      out.push('3. Need to redeploy after code change');
+      alert(out.join('\n'));
+    }
+  },8000);
+
+  const scr=document.createElement('script');
+  scr.id='jsonp-script';
+  scr.src=URL+'?action=load&callback='+cbName;
+  scr.onerror=function(){
+    delete window[cbName];
+    out.push('SCRIPT ERROR - could not load URL');
+    out.push('This usually means the deployment URL is wrong or expired');
+    alert(out.join('\n'));
+  };
+  document.head.appendChild(scr);
+}
+
 function renderAll(){renderDash();renderRepairs();renderFleet();renderArchives();updCharts();}
 
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
@@ -1166,15 +1281,14 @@ document.getElementById('import-modal').addEventListener('click',e=>{if(e.target
 function safeRender(){if(document.getElementById('page-dashboard').classList.contains('active'))renderAll();}
 loadL();
 loadYearData();
-if(URL){
-  // Previously connected — skip setup, show app with cached data then sync
-  const _sp=document.getElementById('setup-page');if(_sp)_sp.style.display='none';
-  document.getElementById('page-dashboard').classList.add('active');
-  sp('busy','Reconnecting…');
-  renderAll();    // show cached local data immediately
-  loadSheets();   // then pull latest from Google Sheets
-}
-// else: no URL saved — stay on setup screen, wait for user to connect or skip
+// URL hardcoded — skip setup, go straight to dashboard
+const _sp=document.getElementById('setup-page');if(_sp)_sp.style.display='none';
+document.getElementById('page-dashboard').classList.add('active');
+renderAll(); // render local hardcoded data immediately so screen isn't blank
+sp('busy','Connecting…');
+setTimeout(function(){
+  loadSheets(); // load from sheet, then auto-sync if sheet fleet is empty
+},300);
 </script>
 
 <datalist id="fund-dl"><option>Johnny's</option><option>FIF</option><option>ICBC Claim + FIF</option><option>ICBC Claim</option></datalist>
