@@ -173,7 +173,7 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
       </div>
     </div>
     <div class="card">
-      <div class="card-title">Budget</div>
+      <div class="card-title">Budget <span style="font-size:9px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(excl. Johnny's)</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
         <div class="bc"><div class="bc-lbl">Total Budget</div><div class="bc-val" id="db1" style="color:var(--text)">—</div></div>
         <div class="bc"><div class="bc-lbl">Est. Pre-Tax (Active)</div><div class="bc-val" id="db-pre" style="color:var(--muted2)">—</div></div>
@@ -181,6 +181,12 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
         <div class="bc"><div class="bc-lbl">Actual Paid (pre-tax)</div><div class="bc-val" id="db3" style="color:var(--green)">—</div></div>
         <div class="bc"><div class="bc-lbl">Actual (with tax)</div><div class="bc-val" id="db-wtax" style="color:var(--green)">—</div></div>
         <div class="bc"><div class="bc-lbl">Budget Remaining</div><div class="bc-val" id="db4" style="color:var(--accent)">—</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <div class="bc" style="border-color:rgba(168,85,247,0.25)"><div class="bc-lbl" style="color:var(--purple)">Johnny's Est.</div><div class="bc-val" id="db-je" style="color:var(--purple)">—</div></div>
+        <div class="bc" style="border-color:rgba(168,85,247,0.25)"><div class="bc-lbl" style="color:var(--purple)">Johnny's Paid</div><div class="bc-val" id="db-ja" style="color:var(--purple)">—</div></div>
+        <div class="bc" style="border-color:rgba(249,115,22,0.25)"><div class="bc-lbl" style="color:var(--orange)">Parts Est.</div><div class="bc-val" id="db-pe2" style="color:var(--orange)">—</div></div>
+        <div class="bc" style="border-color:rgba(249,115,22,0.25)"><div class="bc-lbl" style="color:var(--orange)">Parts Paid</div><div class="bc-val" id="db-pa2" style="color:var(--orange)">—</div></div>
       </div>
     </div>
   </div>
@@ -203,11 +209,17 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
     <button class="btn btn-primary btn-sm" onclick="openAdd()">+ Add</button>
   </div>
   <div class="bstrip" style="grid-template-columns:repeat(5,1fr)">
-    <div class="bc"><div class="bc-lbl">Budget</div><div class="bc-val" id="rt1" style="color:var(--text)">—</div></div>
+    <div class="bc"><div class="bc-lbl">Budget <span style="font-size:9px;font-weight:400;text-transform:none">(excl. Johnny's)</span></div><div class="bc-val" id="rt1" style="color:var(--text)">—</div></div>
     <div class="bc"><div class="bc-lbl">Est. Pre-Tax (Active)</div><div class="bc-val" id="rt-pre" style="color:var(--muted2)">—</div></div>
     <div class="bc"><div class="bc-lbl">Taxes Paid (Fixed)</div><div class="bc-val" id="rt2" style="color:var(--teal)">—</div></div>
     <div class="bc"><div class="bc-lbl">Actual Paid (w/tax)</div><div class="bc-val" id="rt3" style="color:var(--green)">—</div></div>
     <div class="bc"><div class="bc-lbl">Budget Remaining</div><div class="bc-val" id="rt4" style="color:var(--accent)">—</div></div>
+  </div>
+  <div class="bstrip" style="grid-template-columns:repeat(4,1fr);margin-top:-6px">
+    <div class="bc" style="border-color:rgba(168,85,247,0.25)"><div class="bc-lbl" style="color:var(--purple)">Johnny's Est. (Active)</div><div class="bc-val" id="rt-je" style="color:var(--purple)">—</div></div>
+    <div class="bc" style="border-color:rgba(168,85,247,0.25)"><div class="bc-lbl" style="color:var(--purple)">Johnny's Paid (Fixed)</div><div class="bc-val" id="rt-ja" style="color:var(--purple)">—</div></div>
+    <div class="bc" style="border-color:rgba(249,115,22,0.25)"><div class="bc-lbl" style="color:var(--orange)">Parts Est. (Active)</div><div class="bc-val" id="rt-pe2" style="color:var(--orange)">—</div></div>
+    <div class="bc" style="border-color:rgba(249,115,22,0.25)"><div class="bc-lbl" style="color:var(--orange)">Parts Paid (Fixed)</div><div class="bc-val" id="rt-pa2" style="color:var(--orange)">—</div></div>
   </div>
   <div id="taxes-monthly-strip"></div>
   <div class="info">Yellow cells = editable inline · Enter amounts exactly from invoice/estimate · Tax refunded — tracked separately · Multiple rows per van = multiple damages</div>
@@ -276,7 +288,7 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
     </div>
     <div class="fr c2">
       <div class="fg"><label class="fl">Body Shop</label><input class="fi" id="m-shop" list="sdl"/><datalist id="sdl"><option>Fixx Auto</option><option>AJ Body Shop</option><option>Burnaby Auto Body</option></datalist></div>
-      <div class="fg"><label class="fl">Funding Source</label><select class="fi" id="m-fund"><option value="">Select…</option><option>Johnny's</option><option>FIF</option><option>ICBC Claim + FIF</option><option>ICBC Claim</option></select></div>
+      <div class="fg"><label class="fl">Funding Source</label><select class="fi" id="m-fund"><option value="">Select…</option><option>Johnny's</option><option>FIF</option><option>ICBC Claim + FIF</option><option>ICBC Claim</option><option>Parts</option></select></div>
     </div>
     <div class="fr"><div class="fg"><label class="fl">Description</label><input class="fi" id="m-desc" placeholder="e.g. Body Damage, Roof, ICBC Deductible…"/></div></div>
     <hr class="modal-divider"/>
@@ -334,7 +346,7 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
       <div class="fg"><label class="fl">Filter by Funding</label>
         <select class="fi" id="rep-funding" onchange="buildReport()">
           <option value="all">All Funding Types</option>
-          <option>FIF</option><option>ICBC Claim</option><option>ICBC Claim + FIF</option><option>Johnny's</option>
+          <option>FIF</option><option>ICBC Claim</option><option>ICBC Claim + FIF</option><option>Johnny's</option><option>Parts</option>
         </select></div>
     </div>
     <div id="report-content"></div>
@@ -366,7 +378,7 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
   </div>
 </div>
 
-<datalist id="fund-dl"><option>Johnny's</option><option>FIF</option><option>ICBC Claim + FIF</option><option>ICBC Claim</option></datalist>
+<datalist id="fund-dl"><option>Johnny's</option><option>FIF</option><option>ICBC Claim + FIF</option><option>ICBC Claim</option><option>Parts</option></datalist>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -554,18 +566,38 @@ function st(){
   const p1=fleet.filter(f=>f.grade==='1-Poor').length,p2=fleet.filter(f=>f.grade==='2-Poor').length;
   const fa=fleet.filter(f=>f.grade==='3-Fair').length,gr=fleet.filter(f=>f.grade==='5-Great').length;
   const total=fleet.length,comp=fa+gr,pct=(comp/total*100).toFixed(1),need=Math.max(0,Math.ceil(total*0.70)-comp);
-  const cEpre=repairs.filter(r=>r.status!=='FIXED').reduce((s,r)=>s+(r.pe||0),0);
-  const cEtax=repairs.filter(r=>r.status!=='FIXED').reduce((s,r)=>s+(r.taxE||0),0);
+
+  const isJ=r=>r.funding==="Johnny's";
+  const isParts=r=>r.funding==='Parts';
+
+  // Active (non-fixed) repairs
+  const activeAll=repairs.filter(r=>r.status!=='FIXED');
+  const activeOurs=activeAll.filter(r=>!isJ(r));          // budget: excl. Johnny's (Parts stays in)
+  const cEpre=activeOurs.reduce((s,r)=>s+(r.pe||0),0);
+  const cEtax=activeOurs.reduce((s,r)=>s+(r.taxE||0),0);
   const cE=+(cEpre+cEtax).toFixed(2);
+
+  // Fixed repairs
   const fixedR=repairs.filter(r=>r.status==='FIXED');
-  const cApre=fixedR.reduce((s,r)=>s+(r.pa||0),0);
-  const cAtax=fixedR.reduce((s,r)=>s+(r.taxA||0),0);
+  const fixedOurs=fixedR.filter(r=>!isJ(r));               // budget: excl. Johnny's
+  const cApre=fixedOurs.reduce((s,r)=>s+(r.pa||0),0);
+  const cAtax=fixedOurs.reduce((s,r)=>s+(r.taxA||0),0);
   const cA=+(cApre+cAtax).toFixed(2);
   const taxesPaid=+cAtax.toFixed(2);
+
   const rem=+(BUDGET-cEpre-cApre).toFixed(2);
+
+  // Johnny's totals (completely separate from budget)
+  const johnnysEst =activeAll.filter(isJ).reduce((s,r)=>s+(r.pe||0),0);
+  const johnnysAct =fixedR.filter(isJ).reduce((s,r)=>s+(r.pa||0),0);
+
+  // Parts totals (still inside budget, but tracked separately for visibility)
+  const partsEst=activeAll.filter(isParts).reduce((s,r)=>s+(r.pe||0),0);
+  const partsAct=fixedR.filter(isParts).reduce((s,r)=>s+(r.pa||0),0);
+
   const uP=[...new Set(repairs.map(r=>r.plate))];
   const aC=comp+uP.filter(p=>{const v=fleet.find(f=>f.plate===p);return v&&(v.grade==='1-Poor'||v.grade==='2-Poor');}).length;
-  return{p1,p2,fa,gr,total,comp,pct,need,cEpre,cEtax,cE,cApre,cAtax,cA,taxesPaid,rem};
+  return{p1,p2,fa,gr,total,comp,pct,need,cEpre,cEtax,cE,cApre,cAtax,cA,taxesPaid,rem,johnnysEst,johnnysAct,partsEst,partsAct};
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -587,6 +619,10 @@ function renderDash(){
   $el('db-wtax',$f(s.cA));
   $el('db4',$f(s.rem));
   $sty('db4','color',s.rem<0?'var(--red)':'var(--accent)');
+  $el('db-je',$f(s.johnnysEst));
+  $el('db-ja',$f(s.johnnysAct));
+  $el('db-pe2',$f(s.partsEst));
+  $el('db-pa2',$f(s.partsAct));
   const aC=s.comp+[...new Set(repairs.map(r=>r.plate))].filter(p=>{const v=fleet.find(f=>f.plate===p);return v&&(v.grade==='1-Poor'||v.grade==='2-Poor');}).length;
   $el('wa',`After scheduled repairs: ${aC}/${s.total} = ${(aC/s.total*100).toFixed(1)}%`);
   const db=document.getElementById('dash-body');
@@ -608,6 +644,8 @@ function renderRepairs(){
   $el('rt1',$f(BUDGET));$el('rt-pre',$f(s.cEpre));$el('rt2',$f(s.taxesPaid));
   $el('rt3',$f(s.cA));$el('rt4',$f(s.rem));
   $sty('rt4','color',s.rem<0?'var(--red)':'var(--accent)');
+  $el('rt-je',$f(s.johnnysEst));$el('rt-ja',$f(s.johnnysAct));
+  $el('rt-pe2',$f(s.partsEst));$el('rt-pa2',$f(s.partsAct));
 
   // Render monthly taxes paid strip
   renderTaxesMonthly();
