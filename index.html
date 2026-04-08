@@ -801,7 +801,8 @@ function buildReport(){
   // Filter repairs by month/year (use date field) and funding
   const filtered=repairs.filter(r=>{
     if(!r.date)return false;
-    const d=new Date(r.date);
+    if(r.status!=='FIXED')return false;
+    const d=new Date(r.fixedAt||r.date);
     if(d.getFullYear()!==year||d.getMonth()!==month)return false;
     if(fundFilter!=='all'&&r.funding!==fundFilter)return false;
     return true;
@@ -885,7 +886,8 @@ function copyReport(){
   const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const filtered=repairs.filter(r=>{
     if(!r.date)return false;
-    const d=new Date(r.date);
+    if(r.status!=='FIXED')return false;
+    const d=new Date(r.fixedAt||r.date);
     if(d.getFullYear()!==year||d.getMonth()!==month)return false;
     if(fundFilter!=='all'&&r.funding!==fundFilter)return false;
     return true;
