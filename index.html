@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VCE Logistics — Fleet Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0A0C10;--bg2:#111318;--bg3:#181B22;--bg4:#1E222C;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#E8EAF0;--muted:#6B7280;--muted2:#9CA3AF;--accent:#3B82F6;--accent-l:rgba(59,130,246,0.12);--red:#EF4444;--red-l:rgba(239,68,68,0.10);--orange:#F97316;--orange-l:rgba(249,115,22,0.10);--green:#22C55E;--green-l:rgba(34,197,94,0.10);--amber:#EAB308;--amber-l:rgba(234,179,8,0.10);--teal:#14B8A6;--teal-l:rgba(20,184,166,0.10);--purple:#A855F7;--purple-l:rgba(168,85,247,0.10);--fixed-bg:rgba(34,197,94,0.08);--fixed-text:#4ADE80;}
@@ -239,19 +240,23 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
   <div class="abar">
     <span class="abar-title">Fleet PAVE Data</span>
     <input class="search" type="text" placeholder="Search…" oninput="fF(this.value)"/>
+    <button class="btn btn-sm" onclick="document.getElementById('inv-xlsx-i').click()" style="background:rgba(168,85,247,.12);color:var(--purple);border-color:rgba(168,85,247,.3)">📋 Import Van Inventory</button>
+    <input id="inv-xlsx-i" type="file" accept=".xlsx,.xls" style="display:none" onchange="importVanInventory(this)"/>
     <button class="btn btn-sm" onclick="document.getElementById('csv-i2').click()">Import PAVE CSV</button>
     <input id="csv-i2" type="file" accept=".csv" style="display:none" onchange="importCSV(this)"/>
   </div>
-  <div class="info">Quarterly: export CSV from PAVE portal → Import PAVE CSV → updates automatically</div>
+  <div id="vinmap-status" style="margin-bottom:10px"></div>
+  <div class="info">Step 1: Import Van Inventory XLSX → Step 2: Import PAVE CSV — VINs are matched automatically via your inventory</div>
   <div class="gf-row">
     <button class="gf active" data-g="all" onclick="setGF('all',this)">All</button>
     <button class="gf g1" data-g="1-Poor" onclick="setGF('1-Poor',this)">1-Poor</button>
     <button class="gf g2" data-g="2-Poor" onclick="setGF('2-Poor',this)">2-Poor</button>
     <button class="gf g3" data-g="3-Fair" onclick="setGF('3-Fair',this)">3-Fair</button>
     <button class="gf g5" data-g="5-Great" onclick="setGF('5-Great',this)">5-Great</button>
+    <button class="gf" data-g="4-Good" onclick="setGF('4-Good',this)" style="--active-c:var(--green)">4-Good</button>
   </div>
   <div class="table-outer">
-    <table><thead><tr><th>Van ID</th><th>Plate</th><th>Make / Model</th><th>PAVE Grade</th><th>Score</th><th>Grounding Risk</th><th>WTG Status</th></tr></thead>
+    <table><thead><tr><th>Van ID</th><th>Plate</th><th>Make / Model</th><th>VIN</th><th>PAVE Grade</th><th>Score</th><th>Grounding Risk</th><th>WTG Status</th></tr></thead>
     <tbody id="fleet-body"></tbody></table>
   </div>
 </div>
@@ -387,6 +392,7 @@ const GAS_URL='https://script.google.com/macros/s/AKfycbzKKjfYRACpgnNwJGlUYTnBV0
 let BUDGET=60000,editId=null,rQ='',fQ='',gF='all',syncT=null;
 let cG,cC,cB,cP;
 let activeYear=new Date().getFullYear(),archive={},viewingArchive=false,liveRepairs=null,liveBudget=null;
+let vinMap={}; // VIN → {vanId, plate, ymm} — populated by Van Inventory xlsx import
 
 const FD=[{"vanId":"PF192","plate":"VT7992","ymm":"2021 Ford Transit","grade":"1-Poor","score":29},{"vanId":"F112","plate":"SA8312","ymm":"2021 Ford Transit","grade":"1-Poor","score":29},{"vanId":"AF86","plate":"RW7986","ymm":"2021 Ford Transit","grade":"1-Poor","score":31},{"vanId":"PF191","plate":"VT7991","ymm":"2021 Ford Transit","grade":"1-Poor","score":31},{"vanId":"F109","plate":"SA8309","ymm":"2021 Ford Transit","grade":"1-Poor","score":32},{"vanId":"AF68","plate":"SA8308","ymm":"2021 Ford Transit","grade":"1-Poor","score":32},{"vanId":"F111","plate":"SA8311","ymm":"2021 Ford Transit","grade":"1-Poor","score":38},{"vanId":"F91","plate":"RW7991","ymm":"2021 Ford Transit","grade":"1-Poor","score":40},{"vanId":"AF89","plate":"RW7989","ymm":"2021 Ford Transit","grade":"2-Poor","score":4},{"vanId":"AR77","plate":"RW7977","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":11},{"vanId":"AF66","plate":"SA8306","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"F120","plate":"SA8320","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"AF65","plate":"SA8305","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"F115","plate":"SA8315","ymm":"2021 Ford Transit","grade":"2-Poor","score":15},{"vanId":"AF67","plate":"SA8307","ymm":"2021 Ford Transit","grade":"2-Poor","score":15},{"vanId":"F110","plate":"SA8310","ymm":"2021 Ford Transit","grade":"2-Poor","score":16},{"vanId":"PR182","plate":"VK4782","ymm":"2022 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"PR183","plate":"VK4783","ymm":"2022 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"AR84","plate":"RW7984","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"F116","plate":"SA8316","ymm":"2021 Ford Transit","grade":"2-Poor","score":19},{"vanId":"AR81","plate":"RW7981","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":19},{"vanId":"AR78","plate":"RW7978","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":19},{"vanId":"AF63","plate":"SA8303","ymm":"2021 Ford Transit","grade":"2-Poor","score":20},{"vanId":"F119","plate":"SA8319","ymm":"2021 Ford Transit","grade":"2-Poor","score":21},{"vanId":"F117","plate":"SA8317","ymm":"2021 Ford Transit","grade":"2-Poor","score":22},{"vanId":"F118","plate":"SA8318","ymm":"2021 Ford Transit","grade":"2-Poor","score":22},{"vanId":"AF85","plate":"RW7985","ymm":"2021 Ford Transit","grade":"2-Poor","score":23},{"vanId":"F113","plate":"SA8313","ymm":"2021 Ford Transit","grade":"2-Poor","score":24},{"vanId":"AR82","plate":"RW7982","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":25},{"vanId":"AF88","plate":"RW7988","ymm":"2021 Ford Transit","grade":"2-Poor","score":25},{"vanId":"AR76","plate":"RW7976","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":26},{"vanId":"PF190","plate":"VT7990","ymm":"2021 Ford Transit","grade":"2-Poor","score":27},{"vanId":"L13","plate":"WP5601","ymm":"2024 Ford Transit","grade":"3-Fair","score":4},{"vanId":"","plate":"WK2839","ymm":"2024 Ford Transit","grade":"3-Fair","score":4},{"vanId":"AR75","plate":"RW7975","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":9},{"vanId":"AF87","plate":"RW7987","ymm":"2021 Ford Transit","grade":"3-Fair","score":11},{"vanId":"PR189","plate":"VT7989","ymm":"2022 Ram ProMaster","grade":"3-Fair","score":12},{"vanId":"F114","plate":"SA8314","ymm":"2021 Ford Transit","grade":"3-Fair","score":14},{"vanId":"AR79","plate":"RW7979","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":14},{"vanId":"AR80","plate":"RW7980","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":17},{"vanId":"R-128","plate":"VK4908","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"L14","plate":"WP5602","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"","plate":"WE6360","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"PR184","plate":"VK4784","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"R-126","plate":"SS5046","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"R-121","plate":"SS5041","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"L12","plate":"WK2840","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"L15","plate":"WK2833","ymm":"2024 Ford Transit","grade":"5-Great","score":1}];
 let fleet=FD.map(v=>({...v}));
@@ -443,6 +449,7 @@ function saveL(){
     localStorage.setItem('vce_r',JSON.stringify(repairs));
     localStorage.setItem('vce_f',JSON.stringify(fleet));
     localStorage.setItem('vce_b',String(BUDGET));
+    localStorage.setItem('vce_vinmap',JSON.stringify(vinMap));
   }catch(e){}
 }
 
@@ -469,6 +476,8 @@ function loadL(){
     if(f){const pf=JSON.parse(f);if(pf&&pf.length>0)fleet=pf;}
     const b=localStorage.getItem('vce_b');
     if(b&&!isNaN(parseFloat(b)))BUDGET=parseFloat(b);
+    const vm=localStorage.getItem('vce_vinmap');
+    if(vm){try{vinMap=JSON.parse(vm);}catch(e){}}
   }catch(e){}
 }
 
@@ -570,7 +579,7 @@ function parseRepair(r){
 // ══════════════════════════════════════════════════════════════
 function st(){
   const p1=fleet.filter(f=>f.grade==='1-Poor').length,p2=fleet.filter(f=>f.grade==='2-Poor').length;
-  const fa=fleet.filter(f=>f.grade==='3-Fair').length,gr=fleet.filter(f=>f.grade==='5-Great').length;
+  const fa=fleet.filter(f=>f.grade==='3-Fair').length,gr=fleet.filter(f=>f.grade==='5-Great'||f.grade==='4-Good').length;
   const total=fleet.length,comp=fa+gr,pct=(comp/total*100).toFixed(1),need=Math.max(0,Math.ceil(total*0.70)-comp);
 
   const isJ=r=>r.funding==="Johnny's";
@@ -772,7 +781,9 @@ function renderFleet(){
   if(fb)fb.innerHTML=fil.map(v=>{
     const comp=v.grade==='3-Fair'||v.grade==='5-Great';
     const bar=`<div class="score-track"><div class="score-fill" style="width:${Math.min(v.score/50*100,100)}%;background:${fc(v.grade)}"></div></div>`;
-    return`<tr><td><span class="vid">${v.vanId||'—'}</span></td><td class="mono">${v.plate}</td><td style="color:var(--muted2)">${v.ymm}</td><td>${gb(v.grade)}</td>
+    return`<tr><td><span class="vid">${v.vanId||'—'}</span></td><td class="mono">${v.plate}</td><td style="color:var(--muted2)">${v.ymm}</td>
+      <td><span class="mono" style="font-size:10px;color:var(--muted)">${v.vin||'—'}</span></td>
+      <td>${gb(v.grade)}</td>
       <td><span class="mono" style="color:var(--text)">${v.score}</span>${bar}</td>
       <td><span class="badge ${v.score>17?'br':'bg'}">${v.score>17?'YES':'No'}</span></td>
       <td><span class="badge ${comp?'bg':'br'}">${comp?'Compliant':'Non-Compliant'}</span></td></tr>`;
@@ -908,17 +919,94 @@ function copyReport(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// FIX 3: CSV IMPORT — broadened plate column detection
+// VAN INVENTORY XLSX IMPORT — builds VIN→{vanId,plate,ymm} map
 // ══════════════════════════════════════════════════════════════
+function importVanInventory(input){
+  const file=input.files[0];if(!file)return;
+  if(typeof XLSX==='undefined'){toast('SheetJS not loaded yet — try again in a moment','err');return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      // Prefer "Van Inventory" sheet, fall back to "Inventory", then first sheet
+      const sheetName=wb.SheetNames.find(n=>/van\s*inventory/i.test(n))
+        ||wb.SheetNames.find(n=>/inventory/i.test(n))
+        ||wb.SheetNames[0];
+      const ws=wb.Sheets[sheetName];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      vinMap={};
+      let count=0;
+      rows.forEach(row=>{
+        const vin=(row['VIN']||row['Vin']||row['vin']||'').toString().trim();
+        const vanId=(row['Van_Id']||row['Van Id']||row['VanId']||row['van_id']||'').toString().trim();
+        const plate=(row['Plate_No']||row['Plate']||row['plate']||row['Plate No']||'').toString().trim();
+        const make=(row['Make']||row['make']||'').toString().trim();
+        const model=(row['Model']||row['model']||'').toString().trim();
+        const year=(row['Year']||row['year']||'').toString().replace('.0','').trim();
+        if(vin&&(vanId||plate)){
+          vinMap[vin]={vanId,plate,ymm:[year,make,model].filter(Boolean).join(' ')};
+          count++;
+        }
+      });
+      saveL();updateVinMapStatus();
+      toast(`Van Inventory loaded — ${count} VINs mapped from "${sheetName}"`, 'ok');
+    }catch(err){
+      toast('Error reading inventory file: '+err.message,'err');
+    }
+    input.value='';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function updateVinMapStatus(){
+  const el=document.getElementById('vinmap-status');if(!el)return;
+  const count=Object.keys(vinMap).length;
+  if(count>0){
+    el.innerHTML=`<span style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--green);background:var(--green-l);border:1px solid rgba(34,197,94,0.3);border-radius:4px;padding:3px 10px">✓ Van Inventory loaded — ${count} VINs mapped &nbsp;<button onclick="vinMap={};saveL();updateVinMapStatus();toast('Inventory cleared','ok')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0">×</button></span>`;
+  }else{
+    el.innerHTML=`<span style="font-size:11px;color:var(--muted);padding:3px 0;display:inline-block">No Van Inventory loaded — import your XLSX first to enable VIN matching</span>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// FIX 3: CSV IMPORT — VIN-based (PAVE) or plate-based fallback
+// ══════════════════════════════════════════════════════════════
+const GRADE_MAP={'1':'1-Poor','2':'2-Poor','3':'3-Fair','4':'4-Good','5':'5-Great'};
+
 function importCSV(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
-    const lines=e.target.result.split('\n').filter(l=>l.trim());
+    const raw=e.target.result;
+    const lines=raw.split('\n').filter(l=>l.trim());
     if(lines.length<2){toast('Empty CSV','err');return;}
-    const headers=lines[0].split(',').map(h=>h.trim().replace(/"/g,'').toLowerCase());
+    // Strip BOM
+    const headers=lines[0].replace(/^\uFEFF/,'').split(',').map(h=>h.trim().replace(/"/g,'').toLowerCase());
 
-    // FIX 3: accept plate / licence / license / lic / reg / vehicle plate / lp
+    const vinI=headers.findIndex(h=>h==='vin');
+    const gradeI=headers.findIndex(h=>h.includes('grading_standard'));
+    const scoreI=headers.findIndex(h=>h==='ics_score');
+    const dmgI=headers.findIndex(h=>h==='total_chargeable_damage');
+    const makeI=headers.findIndex(h=>h==='make');
+    const modelI=headers.findIndex(h=>h==='model');
+    const yearI=headers.findIndex(h=>h==='model_year');
+
+    // Is this a PAVE export?
+    const isPave=vinI>=0&&gradeI>=0;
+    const hasInventory=Object.keys(vinMap).length>0;
+
+    if(isPave&&hasInventory){
+      // Primary path: VIN match via loaded inventory
+      importPaveByVin(lines,headers,{vinI,gradeI,scoreI,dmgI,makeI,modelI,yearI});
+      input.value='';return;
+    }
+
+    if(isPave&&!hasInventory){
+      toast('PAVE format detected — import your Van Inventory XLSX first to enable VIN matching','err');
+      input.value='';return;
+    }
+
+    // Legacy plate-based path (non-PAVE CSVs)
     const pi=headers.findIndex(h=>
       h.includes('plate')||h.includes('licence')||h.includes('license')||
       h.includes('lic.')||h==='lic'||h.includes('reg#')||h.includes('registration')||
@@ -927,8 +1015,8 @@ function importCSV(input){
     const gi=headers.findIndex(h=>h.includes('grade'));
     const si=headers.findIndex(h=>h.includes('score'));
     if(pi<0){
-      toast(`No Plate column found. Headers: ${headers.slice(0,6).join(', ')}…`,'err');
-      return;
+      toast(`No Plate or VIN column found. Headers: ${headers.slice(0,6).join(', ')}…`,'err');
+      input.value='';return;
     }
     const improved=[],worsened=[],unchanged=[],notFound=[];
     lines.slice(1).forEach(line=>{
@@ -938,25 +1026,86 @@ function importCSV(input){
       const ex=fleet.find(f=>f.plate===plate);
       if(!ex){notFound.push(plate);return;}
       const go={'1-Poor':1,'2-Poor':2,'3-Fair':3,'4-Good':4,'5-Great':5};
-      const oR=go[ex.grade]||0,nR=go[grade]||0;
-      const oG=ex.grade;
+      const oR=go[ex.grade]||0,nR=go[grade]||0,oG=ex.grade;
       ex.grade=grade;ex.score=score;
       if(nR>oR)improved.push({plate,vanId:ex.vanId,from:oG,to:grade});
       else if(nR<oR)worsened.push({plate,vanId:ex.vanId,from:oG,to:grade});
       else unchanged.push(plate);
     });
     saveL();renderFleet();renderDash();updCharts();sched();
-    showImportResult(improved,worsened,unchanged,notFound);
+    showImportResult(improved,worsened,unchanged,notFound,[],[]);
     input.value='';
-  };reader.readAsText(file);
+  };
+  reader.readAsText(file);
 }
 
-function showImportResult(improved,worsened,unchanged,notFound){
-  const total=improved.length+worsened.length+unchanged.length;
-  let html=`<div style="font-size:13px;color:var(--muted2);margin-bottom:16px">Processed <strong style="color:var(--text)">${total} vans</strong></div>`;
-  if(worsened.length){html+=`<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--red);margin-bottom:6px">Worsened — ${worsened.length}</div>`;html+=worsened.map(v=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span class="vid">${v.vanId||v.plate}</span><span style="color:var(--muted)">${v.from} → <strong style="color:var(--red)">${v.to}</strong></span></div>`).join('');html+='</div>';}
-  if(improved.length){html+=`<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--green);margin-bottom:6px">Improved — ${improved.length}</div>`;html+=improved.map(v=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span class="vid">${v.vanId||v.plate}</span><span style="color:var(--muted)">${v.from} → <strong style="color:var(--green)">${v.to}</strong></span></div>`).join('');html+='</div>';}
-  html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"><div style="background:var(--bg3);border-radius:6px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted)">No Change</div><div style="font-size:18px;font-weight:700;margin-top:2px">${unchanged.length}</div></div><div style="background:var(--bg3);border-radius:6px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted)">Not in Fleet</div><div style="font-size:18px;font-weight:700;color:var(--orange);margin-top:2px">${notFound.length}</div></div></div>`;
+function importPaveByVin(lines,headers,{vinI,gradeI,scoreI,dmgI,makeI,modelI,yearI}){
+  const improved=[],worsened=[],unchanged=[],notInInventory=[],newVehicles=[];
+  const go={'1-Poor':1,'2-Poor':2,'3-Fair':3,'4-Good':4,'5-Great':5};
+  // Deduplicate: keep latest row per VIN (last wins)
+  const byVin={};
+  lines.slice(1).forEach(line=>{
+    const cols=line.split(',').map(c=>c.trim().replace(/"/g,''));
+    const vin=cols[vinI]||'';
+    if(vin)byVin[vin]=cols;
+  });
+  Object.entries(byVin).forEach(([vin,cols])=>{
+    const gradeNum=cols[gradeI]||'';
+    const grade=GRADE_MAP[gradeNum]||'';
+    const score=scoreI>=0?parseInt(cols[scoreI])||0:0;
+    const make=makeI>=0?cols[makeI]:'';
+    const model=modelI>=0?cols[modelI]:'';
+    const year=yearI>=0?cols[yearI]:'';
+    if(!grade)return;
+    const inv=vinMap[vin];
+    if(!inv){notInInventory.push(vin);return;}
+    const{vanId,plate,ymm}=inv;
+    const ymmFull=ymm||[year,make,model].filter(Boolean).join(' ');
+    let ex=fleet.find(f=>(vanId&&f.vanId===vanId)||(plate&&f.plate===plate));
+    if(ex){
+      const oR=go[ex.grade]||0,nR=go[grade]||0,oG=ex.grade;
+      ex.grade=grade;ex.score=score;ex.ymm=ymmFull||ex.ymm;
+      ex.vin=vin; // store VIN on fleet entry
+      if(nR>oR)improved.push({vanId:vanId||plate,plate,from:oG,to:grade});
+      else if(nR<oR)worsened.push({vanId:vanId||plate,plate,from:oG,to:grade});
+      else unchanged.push(vanId||plate);
+    }else{
+      fleet.push({vanId,plate,ymm:ymmFull,grade,score,vin});
+      newVehicles.push({vanId,plate,grade});
+    }
+  });
+  saveL();renderFleet();renderDash();updCharts();sched();
+  showImportResult(improved,worsened,unchanged,[],notInInventory,newVehicles);
+}
+
+function showImportResult(improved,worsened,unchanged,notFound,notInInventory,newVehicles){
+  const total=improved.length+worsened.length+unchanged.length+(newVehicles||[]).length;
+  let html=`<div style="font-size:13px;color:var(--muted2);margin-bottom:16px">Processed <strong style="color:var(--text)">${total} vans</strong>${(notInInventory||[]).length?` · <span style="color:var(--orange)">${notInInventory.length} VINs not in inventory</span>`:''}</div>`;
+  if((newVehicles||[]).length){
+    html+=`<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--accent);margin-bottom:6px">New Vehicles Added — ${newVehicles.length}</div>`;
+    html+=newVehicles.map(v=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span class="vid">${v.vanId||v.plate}</span><span style="color:var(--muted)">plate: ${v.plate} · <strong style="color:var(--accent)">${v.grade}</strong></span></div>`).join('');
+    html+='</div>';
+  }
+  if(worsened.length){
+    html+=`<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--red);margin-bottom:6px">Worsened — ${worsened.length}</div>`;
+    html+=worsened.map(v=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span class="vid">${v.vanId||v.plate}</span><span style="color:var(--muted)">${v.from} → <strong style="color:var(--red)">${v.to}</strong></span></div>`).join('');
+    html+='</div>';
+  }
+  if(improved.length){
+    html+=`<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--green);margin-bottom:6px">Improved — ${improved.length}</div>`;
+    html+=improved.map(v=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px"><span class="vid">${v.vanId||v.plate}</span><span style="color:var(--muted)">${v.from} → <strong style="color:var(--green)">${v.to}</strong></span></div>`).join('');
+    html+='</div>';
+  }
+  if((notInInventory||[]).length){
+    html+=`<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--orange);margin-bottom:6px">VINs Not in Your Inventory — ${notInInventory.length}</div>`;
+    html+=notInInventory.slice(0,10).map(v=>`<div style="padding:3px 0;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--muted)">${v}</div>`).join('');
+    if(notInInventory.length>10)html+=`<div style="font-size:11px;color:var(--muted)">…and ${notInInventory.length-10} more</div>`;
+    html+='</div>';
+  }
+  html+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+    <div style="background:var(--bg3);border-radius:6px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted)">No Change</div><div style="font-size:18px;font-weight:700;margin-top:2px">${unchanged.length}</div></div>
+    <div style="background:var(--bg3);border-radius:6px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted)">Not in Fleet/Inventory</div><div style="font-size:18px;font-weight:700;color:var(--orange);margin-top:2px">${notFound.length+(notInInventory||[]).length}</div></div>
+  </div>`;
   const ib=document.getElementById('import-result-body');if(ib)ib.innerHTML=html;
   document.getElementById('import-modal').classList.add('open');
 }
@@ -1297,6 +1446,7 @@ loadL();
 document.getElementById('page-dashboard').classList.add('active');
 renderAll();
 $el('bi',BUDGET,'value');
+updateVinMapStatus();
 sp('busy','Connecting…');
 setTimeout(function(){loadSheets(false);},500);
 </script>
