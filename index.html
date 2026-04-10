@@ -1127,7 +1127,28 @@ function initCharts(){
   const h=Math.max(340,poor.length*20+60);const pw=document.getElementById('pw');if(pw)pw.style.height=h+'px';
   cP=new Chart(document.getElementById('chp'),{type:'bar',data:{labels:poor.map(v=>v.vanId||v.plate),datasets:[{data:poor.map(v=>v.score),backgroundColor:poor.map(v=>v.grade==='1-Poor'?'#EF4444':'#F97316'),borderRadius:3,borderSkipped:false}]},options:{...defs,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,title:{display:true,text:'PAVE Score — lower = worse, fix these first',color:'#6B7280',font:{size:10}},grid:{color:gc},ticks:{color:tc}},y:{grid:{display:false},ticks:{color:'#E8EAF0',font:{size:11}}}}}});
 }
-function updCharts(){if(!cG)return;const s=st();cG.data.datasets[0].data=[s.p1,s.p2,s.fa,s.gr];cG.update();cC.data.datasets[0].data=[s.comp,s.total-s.comp];cC.update();const ceTotal=+(s.cEpre+s.cApre).toFixed(2);cB.data.datasets[0].data=[ceTotal,Math.max(0,BUDGET-ceTotal)];cB.update();}
+function updCharts(){
+  if(!cG)return;
+  const s=st();
+  // Grade distribution
+  cG.data.datasets[0].data=[s.p1,s.p2,s.fa,s.gr];
+  cG.update();
+  // WTG compliance
+  cC.data.datasets[0].data=[s.comp,s.total-s.comp];
+  cC.update();
+  // Budget
+  const ceTotal=+(s.cEpre+s.cApre).toFixed(2);
+  cB.data.datasets[0].data=[ceTotal,Math.max(0,BUDGET-ceTotal)];
+  cB.update();
+  // Poor grade vehicles bar — rebuild labels + data when fleet changes
+  const poor=[...fleet].filter(v=>v.grade==='1-Poor'||v.grade==='2-Poor').sort((a,b)=>a.score-b.score);
+  cP.data.labels=poor.map(v=>v.vanId||v.plate);
+  cP.data.datasets[0].data=poor.map(v=>v.score);
+  cP.data.datasets[0].backgroundColor=poor.map(v=>v.grade==='1-Poor'?'#EF4444':'#F97316');
+  const h=Math.max(340,poor.length*20+60);
+  const pw=document.getElementById('pw');if(pw)pw.style.height=h+'px';
+  cP.update();
+}
 
 // ══════════════════════════════════════════════════════════════
 // MODAL
