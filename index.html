@@ -92,7 +92,6 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
 .score-fill{height:100%;border-radius:2px}
 .toast{position:fixed;bottom:20px;right:20px;z-index:300;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,0.4);transform:translateY(60px);opacity:0;transition:all .22s;pointer-events:none}
 .toast.show{transform:translateY(0);opacity:1}.toast.ok{border-left:3px solid var(--green)}.toast.err{border-left:3px solid var(--red)}
-/* Invoice upload */
 .inv-drop{border:2px dashed var(--border2);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .2s;margin-top:8px}
 .inv-drop:hover,.inv-drop.dragover{border-color:var(--accent);background:var(--accent-l)}
 .inv-drop-lbl{font-size:12px;color:var(--muted);pointer-events:none}
@@ -105,7 +104,6 @@ tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2)}
 .inv-file-status.err{background:var(--red-l);color:var(--red)}
 .inv-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;background:rgba(59,130,246,0.15);color:var(--accent);cursor:pointer;border:none;vertical-align:middle;margin-left:4px}
 .inv-badge:hover{background:rgba(59,130,246,0.25)}
-/* Report modal */
 .report-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
 .report-table th{background:var(--bg3);color:var(--muted);padding:8px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;text-align:left}
 .report-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text)}
@@ -393,7 +391,6 @@ let activeYear=new Date().getFullYear(),archive={},viewingArchive=false,liveRepa
 const FD=[{"vanId":"PF192","plate":"VT7992","ymm":"2021 Ford Transit","grade":"1-Poor","score":29},{"vanId":"F112","plate":"SA8312","ymm":"2021 Ford Transit","grade":"1-Poor","score":29},{"vanId":"AF86","plate":"RW7986","ymm":"2021 Ford Transit","grade":"1-Poor","score":31},{"vanId":"PF191","plate":"VT7991","ymm":"2021 Ford Transit","grade":"1-Poor","score":31},{"vanId":"F109","plate":"SA8309","ymm":"2021 Ford Transit","grade":"1-Poor","score":32},{"vanId":"AF68","plate":"SA8308","ymm":"2021 Ford Transit","grade":"1-Poor","score":32},{"vanId":"F111","plate":"SA8311","ymm":"2021 Ford Transit","grade":"1-Poor","score":38},{"vanId":"F91","plate":"RW7991","ymm":"2021 Ford Transit","grade":"1-Poor","score":40},{"vanId":"AF89","plate":"RW7989","ymm":"2021 Ford Transit","grade":"2-Poor","score":4},{"vanId":"AR77","plate":"RW7977","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":11},{"vanId":"AF66","plate":"SA8306","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"F120","plate":"SA8320","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"AF65","plate":"SA8305","ymm":"2021 Ford Transit","grade":"2-Poor","score":14},{"vanId":"F115","plate":"SA8315","ymm":"2021 Ford Transit","grade":"2-Poor","score":15},{"vanId":"AF67","plate":"SA8307","ymm":"2021 Ford Transit","grade":"2-Poor","score":15},{"vanId":"F110","plate":"SA8310","ymm":"2021 Ford Transit","grade":"2-Poor","score":16},{"vanId":"PR182","plate":"VK4782","ymm":"2022 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"PR183","plate":"VK4783","ymm":"2022 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"AR84","plate":"RW7984","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":17},{"vanId":"F116","plate":"SA8316","ymm":"2021 Ford Transit","grade":"2-Poor","score":19},{"vanId":"AR81","plate":"RW7981","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":19},{"vanId":"AR78","plate":"RW7978","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":19},{"vanId":"AF63","plate":"SA8303","ymm":"2021 Ford Transit","grade":"2-Poor","score":20},{"vanId":"F119","plate":"SA8319","ymm":"2021 Ford Transit","grade":"2-Poor","score":21},{"vanId":"F117","plate":"SA8317","ymm":"2021 Ford Transit","grade":"2-Poor","score":22},{"vanId":"F118","plate":"SA8318","ymm":"2021 Ford Transit","grade":"2-Poor","score":22},{"vanId":"AF85","plate":"RW7985","ymm":"2021 Ford Transit","grade":"2-Poor","score":23},{"vanId":"F113","plate":"SA8313","ymm":"2021 Ford Transit","grade":"2-Poor","score":24},{"vanId":"AR82","plate":"RW7982","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":25},{"vanId":"AF88","plate":"RW7988","ymm":"2021 Ford Transit","grade":"2-Poor","score":25},{"vanId":"AR76","plate":"RW7976","ymm":"2021 Ram ProMaster","grade":"2-Poor","score":26},{"vanId":"PF190","plate":"VT7990","ymm":"2021 Ford Transit","grade":"2-Poor","score":27},{"vanId":"L13","plate":"WP5601","ymm":"2024 Ford Transit","grade":"3-Fair","score":4},{"vanId":"","plate":"WK2839","ymm":"2024 Ford Transit","grade":"3-Fair","score":4},{"vanId":"AR75","plate":"RW7975","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":9},{"vanId":"AF87","plate":"RW7987","ymm":"2021 Ford Transit","grade":"3-Fair","score":11},{"vanId":"PR189","plate":"VT7989","ymm":"2022 Ram ProMaster","grade":"3-Fair","score":12},{"vanId":"F114","plate":"SA8314","ymm":"2021 Ford Transit","grade":"3-Fair","score":14},{"vanId":"AR79","plate":"RW7979","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":14},{"vanId":"AR80","plate":"RW7980","ymm":"2021 Ram ProMaster","grade":"3-Fair","score":17},{"vanId":"R-128","plate":"VK4908","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"L14","plate":"WP5602","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"","plate":"WE6360","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"PR184","plate":"VK4784","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"R-126","plate":"SS5046","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"R-121","plate":"SS5041","ymm":"2022 Ram ProMaster","grade":"5-Great","score":0},{"vanId":"L12","plate":"WK2840","ymm":"2024 Ford Transit","grade":"5-Great","score":0},{"vanId":"L15","plate":"WK2833","ymm":"2024 Ford Transit","grade":"5-Great","score":1}];
 let fleet=FD.map(v=>({...v}));
 
-// Default repairs — only used if localStorage AND sheet are both empty
 const DEFAULT_REPAIRS=[
   {id:1,vanId:'F91',plate:'RW7991',shop:'Burnaby Auto Body',desc:'Body Damage — Amazon WTG Priority',pe:null,taxE:null,pa:null,taxA:null,status:'Waiting for Estimate',funding:'ICBC Claim',date:'2026-03-31',notes:'Amazon priority VIN',fixedAt:null},
   {id:2,vanId:'F112',plate:'SA8312',shop:'Fixx Auto',desc:'Body Damage',pe:3125,taxE:null,pa:null,taxA:null,status:'Waiting for Approval',funding:"Johnny's",date:'2026-03-28',notes:'',fixedAt:null},
@@ -419,6 +416,16 @@ const $sty=(id,prop,val)=>{const e=document.getElementById(id);if(e)e.style[prop
 const nid=()=>repairs.length?Math.max(...repairs.map(r=>r.id))+1:1;
 const n=v=>(v!==null&&v!==''&&v!==undefined&&!isNaN(parseFloat(v)))?parseFloat(v):null;
 const s=v=>(v!=null&&v!==''&&v!=='null')?String(v):'';
+
+// ── FIX 1: Normalize any date value to yyyy-MM-dd ──────────────
+function normDate(v){
+  if(!v||v==='null')return '';
+  const str=String(v);
+  // Already yyyy-MM-dd
+  if(/^\d{4}-\d{2}-\d{2}$/.test(str))return str;
+  // ISO string like 2026-03-29T07:00:00.000Z
+  return str.slice(0,10);
+}
 
 function sp(cls,msg){const e=document.getElementById('sync-pill');if(e){e.className='sync-pill '+cls;e.textContent=msg;}}
 function toast(msg,t='ok'){const e=document.getElementById('toast');if(e){e.textContent=msg;e.className=`toast ${t} show`;setTimeout(()=>e.className='toast',2800);}}
@@ -449,10 +456,12 @@ function loadL(){
           ...rep,
           pe:n(rep.pe), taxE:n(rep.taxE),
           pa:n(rep.pa), taxA:n(rep.taxA),
-          // backwards compat: old format had gstE/pstE — merge into taxE
           taxE:n(rep.taxE)||(n(rep.gstE)!=null&&n(rep.pstE)!=null?(n(rep.gstE)||0)+(n(rep.pstE)||0):n(rep.gstE)||n(rep.pstE)||null),
           taxA:n(rep.taxA)||(n(rep.gstA)!=null&&n(rep.pstA)!=null?(n(rep.gstA)||0)+(n(rep.pstA)||0):n(rep.gstA)||n(rep.pstA)||null),
           invoiceUrls:Array.isArray(rep.invoiceUrls)?rep.invoiceUrls:(rep.invoiceUrls?JSON.parse(rep.invoiceUrls):[]),
+          // FIX 1: normalize date fields from localStorage (may be ISO strings)
+          date:normDate(rep.date),
+          fixedAt:rep.fixedAt?normDate(rep.fixedAt):null,
         }));
       }
     }
@@ -467,7 +476,7 @@ function loadL(){
 // SHEET SYNC — sheet is BACKUP, localStorage is primary
 // ══════════════════════════════════════════════════════════════
 function syncNow(){
-  saveL(); // always save locally first
+  saveL();
   if(!GAS_URL){sp('ok','Saved locally');return;}
   sp('busy','Syncing…');
   const payload={action:'save_all',budget:BUDGET,
@@ -492,67 +501,64 @@ function syncNow(){
     .catch(()=>sp('err','Sync failed'));
 }
 
-// Load from sheet — ONLY overwrites local if forceLoad=true
+// ── FIX 2: Load via fetch GET instead of JSONP script tag ──────
+// JSONP was being blocked by Edge tracking prevention.
+// fetch() GET works the same way the POST sync does.
 function loadSheets(forceLoad){
   if(!GAS_URL){sp('err','No URL');return;}
   sp('busy','Loading…');
-  const cb='vce_cb_'+Date.now();
-  window[cb]=function(d){
-    delete window[cb];
-    const sc=document.getElementById('jsonp-script');if(sc)sc.remove();
-    if(d&&d.ok){
-      if(forceLoad){
-        // User pressed Load — sheet is authoritative
-        if(d.repairs&&d.repairs.length>0){
-          repairs=d.repairs.map(parseRepair);
-          saveL(); // save what we loaded to localStorage
-        }
-        if(d.budget)BUDGET=+d.budget;
-        $el('bi',BUDGET,'value');
-        renderAll();
-        sp('ok','Loaded ✓');
-        toast('Loaded from Google Sheets','ok');
-      } else {
-        // Auto-load on startup — only push if sheet is empty
-        if(!d.repairs||d.repairs.length===0){
-          sp('busy','First run — syncing to sheet…');
-          setTimeout(syncNow,300);
+  fetch(GAS_URL+'?action=load',{method:'GET'})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.ok){
+        if(forceLoad){
+          // User pressed Load — sheet is authoritative
+          if(d.repairs&&d.repairs.length>0){
+            repairs=d.repairs.map(parseRepair);
+            saveL();
+          }
+          if(d.budget)BUDGET=+d.budget;
+          $el('bi',BUDGET,'value');
+          renderAll();
+          sp('ok','Loaded ✓');
+          toast('Loaded from Google Sheets','ok');
         } else {
-          sp('ok','Connected ✓');
+          // Auto-load on startup — only push if sheet is empty
+          if(!d.repairs||d.repairs.length===0){
+            sp('busy','First run — syncing to sheet…');
+            setTimeout(syncNow,300);
+          } else {
+            sp('ok','Connected ✓');
+          }
         }
-      }
-      // Update fleet grades if sheet has them
-      if(d.fleet&&d.fleet.length>0){
-        const mapped=d.fleet.map(f=>({...f,score:+f.score}));
-        if(mapped.some(f=>f.grade&&(f.grade.includes('Poor')||f.grade.includes('Fair')||f.grade.includes('Great')))){
-          fleet=mapped; saveL();
+        // Update fleet grades if sheet has them
+        if(d.fleet&&d.fleet.length>0){
+          const mapped=d.fleet.map(function(f){return Object.assign({},f,{score:+f.score});});
+          if(mapped.some(function(f){return f.grade&&(f.grade.includes('Poor')||f.grade.includes('Fair')||f.grade.includes('Great'));})){
+            fleet=mapped; saveL();
+          }
         }
+        if(!forceLoad) renderAll();
+      } else {
+        sp('err','Sheet error');
+        renderAll();
       }
-      if(!forceLoad) renderAll();
-    } else {
-      sp('err','Sheet error');
-      renderAll();
-    }
-  };
-  const t=setTimeout(()=>{
-    if(window[cb]){delete window[cb];sp('err','Timeout');renderAll();}
-  },10000);
-  const sc=document.createElement('script');
-  sc.id='jsonp-script';
-  sc.src=GAS_URL+'?action=load&callback='+cb;
-  sc.onerror=()=>{clearTimeout(t);delete window[cb];sp('err','Not connected');renderAll();};
-  document.head.appendChild(sc);
+    })
+    .catch(function(){sp('err','Not connected');renderAll();});
 }
 
 function parseRepair(r){
-  const taxE=n(r.gstE)!=null?n(r.gstE):n(r.gstEst); // gstE col = actual tax amount
+  const taxE=n(r.gstE)!=null?n(r.gstE):n(r.gstEst);
   const taxA=n(r.gstA)!=null?n(r.gstA):n(r.gstActAmt);
   return {
     id:r.id?+r.id:0,
     vanId:s(r.vanId),plate:s(r.plate),shop:s(r.shop),
     desc:s(r.desc),status:s(r.status)||'Waiting for Estimate',
-    funding:s(r.funding),date:s(r.date),notes:s(r.notes),
-    fixedAt:r.fixedAt&&r.fixedAt!=='null'&&r.fixedAt!==''?s(r.fixedAt):null,
+    funding:s(r.funding),
+    // FIX 1: normalize dates coming from the sheet (may be ISO strings)
+    date:normDate(r.date),
+    notes:s(r.notes),
+    fixedAt:r.fixedAt&&r.fixedAt!=='null'&&r.fixedAt!==''?normDate(r.fixedAt):null,
     pe:n(r.preTaxEst),taxE:taxE,
     pa:n(r.preTaxAct),taxA:taxA,
     invoiceUrls:Array.isArray(r.invoiceUrls)?r.invoiceUrls:(r.invoiceUrls&&r.invoiceUrls!=='null'?JSON.parse(r.invoiceUrls):[]),
@@ -570,16 +576,14 @@ function st(){
   const isJ=r=>r.funding==="Johnny's";
   const isParts=r=>r.funding==='Parts';
 
-  // Active (non-fixed) repairs
   const activeAll=repairs.filter(r=>r.status!=='FIXED');
-  const activeOurs=activeAll.filter(r=>!isJ(r));          // budget: excl. Johnny's (Parts stays in)
+  const activeOurs=activeAll.filter(r=>!isJ(r));
   const cEpre=activeOurs.reduce((s,r)=>s+(r.pe||0),0);
   const cEtax=activeOurs.reduce((s,r)=>s+(r.taxE||0),0);
   const cE=+(cEpre+cEtax).toFixed(2);
 
-  // Fixed repairs
   const fixedR=repairs.filter(r=>r.status==='FIXED');
-  const fixedOurs=fixedR.filter(r=>!isJ(r));               // budget: excl. Johnny's
+  const fixedOurs=fixedR.filter(r=>!isJ(r));
   const cApre=fixedOurs.reduce((s,r)=>s+(r.pa||0),0);
   const cAtax=fixedOurs.reduce((s,r)=>s+(r.taxA||0),0);
   const cA=+(cApre+cAtax).toFixed(2);
@@ -587,11 +591,9 @@ function st(){
 
   const rem=+(BUDGET-cEpre-cApre).toFixed(2);
 
-  // Johnny's totals (completely separate from budget)
   const johnnysEst =activeAll.filter(isJ).reduce((s,r)=>s+(r.pe||0),0);
   const johnnysAct =fixedR.filter(isJ).reduce((s,r)=>s+(r.pa||0),0);
 
-  // Parts totals (still inside budget, but tracked separately for visibility)
   const partsEst=activeAll.filter(isParts).reduce((s,r)=>s+(r.pe||0),0);
   const partsAct=fixedR.filter(isParts).reduce((s,r)=>s+(r.pa||0),0);
 
@@ -647,13 +649,11 @@ function renderRepairs(){
   $el('rt-je',$f(s.johnnysEst));$el('rt-ja',$f(s.johnnysAct));
   $el('rt-pe2',$f(s.partsEst));$el('rt-pa2',$f(s.partsAct));
 
-  // Render monthly taxes paid strip
   renderTaxesMonthly();
 
   const act=repairs.filter(r=>r.status!=='FIXED').sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   const fx=repairs.filter(r=>r.status==='FIXED');
 
-  // Group fixed by month (fixedAt), newest first
   const fxByMonth={};
   fx.forEach(r=>{const key=r.fixedAt?r.fixedAt.slice(0,7):'Unknown';if(!fxByMonth[key])fxByMonth[key]=[];fxByMonth[key].push(r);});
   const fxMonths=Object.keys(fxByMonth).sort((a,b)=>b.localeCompare(a));
@@ -670,6 +670,8 @@ function renderRepairs(){
     const totalE=r.pe!=null?(r.pe+(r.taxE||0)):null;
     const totalA=r.pa!=null?(r.pa+(r.taxA||0)):null;
     const invCount=(r.invoiceUrls||[]).length;
+    // FIX 1: use normDate so input value is always yyyy-MM-dd
+    const dateVal=normDate(r.date);
     return`<tr class="${isF?'fx':''}" data-id="${r.id}">
       <td><span class="vid">${r.vanId||'—'}</span></td>
       <td class="mono">${r.plate||'—'}</td>
@@ -685,7 +687,7 @@ function renderRepairs(){
         ${['Waiting for Estimate','Estimate Pending','Waiting for Approval','Scheduled','In Progress','FIXED'].map(st=>`<option${st===r.status?' selected':''}>${st}</option>`).join('')}
       </select></td>
       <td><input class="ed" style="width:112px" list="fund-dl" value="${r.funding||''}" placeholder="Funding…" onchange="upd(${r.id},'funding',this.value)"/></td>
-      <td><input class="ed" style="width:104px" type="date" value="${r.date||''}" onchange="upd(${r.id},'date',this.value)"/></td>
+      <td><input class="ed" style="width:104px" type="date" value="${dateVal}" onchange="upd(${r.id},'date',this.value)"/></td>
       <td><input class="ed" style="width:120px" value="${r.notes||''}" placeholder="Notes" onchange="upd(${r.id},'notes',this.value)"/></td>
       <td><button class="inv-badge" onclick="viewInvoices(${r.id})" title="${invCount?'View invoices':'No invoices yet'}">📎${invCount?` ${invCount}`:''}</button></td>
       <td style="white-space:nowrap">
@@ -697,7 +699,6 @@ function renderRepairs(){
   const mNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   let html=sorted.map(rowHtml).join('');
 
-  // Fixed rows grouped by month
   fxMonths.forEach(m=>{
     let label,fxSearch=rQ.toLowerCase();
     if(m==='Unknown'){label='Unknown Date';}
@@ -735,7 +736,6 @@ function upd(id,f,v){
   const r=repairs.find(r=>r.id===id);if(!r)return;
   const numF=['pe','taxE','pa','taxA'];
   r[f]=numF.includes(f)?(v===''||v===null||isNaN(parseFloat(v))?null:parseFloat(v)):v;
-  // Tax sync: taxA and taxE always mirror each other
   if(f==='taxA') r.taxE=r.taxA;
   if(f==='taxE') r.taxA=r.taxE;
   saveL();renderAll();sched();
@@ -798,7 +798,6 @@ function buildReport(){
   const fundFilter=document.getElementById('rep-funding').value;
   const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-  // Filter repairs by month/year (use date field) and funding
   const filtered=repairs.filter(r=>{
     if(!r.date)return false;
     if(r.status!=='FIXED')return false;
@@ -816,7 +815,6 @@ function buildReport(){
     return;
   }
 
-  // Group by funding type for sub-totals
   const byFund={};
   filtered.forEach(r=>{
     const f=r.funding||'Other';
@@ -850,7 +848,6 @@ function buildReport(){
     </tr>`;
   });
 
-  // Sub-totals by funding
   if(Object.keys(byFund).length>1){
     Object.entries(byFund).forEach(([fund,rows])=>{
       const subPre=rows.reduce((s,r)=>s+(r.pe||r.pa||0),0);
@@ -911,7 +908,7 @@ function copyReport(){
 }
 
 // ══════════════════════════════════════════════════════════════
-// CSV IMPORT
+// FIX 3: CSV IMPORT — broadened plate column detection
 // ══════════════════════════════════════════════════════════════
 function importCSV(input){
   const file=input.files[0];if(!file)return;
@@ -920,10 +917,19 @@ function importCSV(input){
     const lines=e.target.result.split('\n').filter(l=>l.trim());
     if(lines.length<2){toast('Empty CSV','err');return;}
     const headers=lines[0].split(',').map(h=>h.trim().replace(/"/g,'').toLowerCase());
-    const pi=headers.findIndex(h=>h.includes('plate')||h.includes('license'));
+
+    // FIX 3: accept plate / licence / license / lic / reg / vehicle plate / lp
+    const pi=headers.findIndex(h=>
+      h.includes('plate')||h.includes('licence')||h.includes('license')||
+      h.includes('lic.')||h==='lic'||h.includes('reg#')||h.includes('registration')||
+      h.includes('lp')||h==='lp #'||h.includes('veh. plate')
+    );
     const gi=headers.findIndex(h=>h.includes('grade'));
     const si=headers.findIndex(h=>h.includes('score'));
-    if(pi<0){toast('No Plate column found','err');return;}
+    if(pi<0){
+      toast(`No Plate column found. Headers: ${headers.slice(0,6).join(', ')}…`,'err');
+      return;
+    }
     const improved=[],worsened=[],unchanged=[],notFound=[];
     lines.slice(1).forEach(line=>{
       const cols=line.split(',').map(c=>c.trim().replace(/"/g,''));
@@ -996,15 +1002,14 @@ function openEdit(id){
   document.getElementById('m-shop').value=r.shop||'';
   document.getElementById('m-desc').value=r.desc||'';
   document.getElementById('m-notes').value=r.notes||'';
-  document.getElementById('m-date').value=r.date||'';
+  // FIX 1: normalize date before binding to input
+  document.getElementById('m-date').value=normDate(r.date);
   document.getElementById('m-pe').value=r.pe!=null?r.pe:'';
-  // single tax field — use taxA (preferred) or taxE as fallback
   document.getElementById('m-ta-tax').value=(r.taxA!=null?r.taxA:(r.taxE!=null?r.taxE:''));
   document.getElementById('m-pa').value=r.pa!=null?r.pa:'';
   document.getElementById('m-stat').value=r.status||'';
   document.getElementById('m-fund').value=r.funding||'';
   calcMTotal();calcMActTotal();
-  // Populate existing invoices
   renderModalInvoices(r.invoiceUrls||[]);
   document.getElementById('inv-upload-list').innerHTML='';
   document.getElementById('modal').classList.add('open');
@@ -1015,10 +1020,7 @@ function calcMTotal(){
   const tax=parseFloat(document.getElementById('m-ta-tax').value)||0;
   document.getElementById('m-te').value=(pe||tax)?'$'+(pe+tax).toFixed(2):'';
 }
-function syncModalTax(){
-  // Tax field drives both estimate and actual — also recalc estimate total
-  calcMTotal();
-}
+function syncModalTax(){calcMTotal();}
 function calcMActTotal(){
   const pa=parseFloat(document.getElementById('m-pa').value)||0;
   const tax=parseFloat(document.getElementById('m-ta-tax').value)||0;
@@ -1044,7 +1046,6 @@ function saveRepair(){
   if(editId){
     const r=repairs.find(r=>r.id===editId);
     Object.assign(r,obj);
-    // preserve invoiceUrls — do not overwrite
     if(obj.status==='FIXED'&&!r.fixedAt)r.fixedAt=new Date().toISOString().slice(0,10);
     toast('Updated','ok');
   } else {
@@ -1059,8 +1060,6 @@ function saveRepair(){
 
 // ══════════════════════════════════════════════════════════════
 // INVOICES — Google Drive upload
-// Root folder: 1Qf2H6B3szXR0SXJebM4-HHVOhbnMAZy3
-// Structure:  YYYY / MM-MonthName / VanID / date_description.ext
 // ══════════════════════════════════════════════════════════════
 const DRIVE_ROOT='1Qf2H6B3szXR0SXJebM4-HHVOhbnMAZy3';
 const MONTH_NAMES=['01-January','02-February','03-March','04-April','05-May','06-June','07-July','08-August','09-September','10-October','11-November','12-December'];
@@ -1086,7 +1085,6 @@ function removeInvoice(idx){
   saveL();renderModalInvoices(r.invoiceUrls);sched();
 }
 
-// Drag & drop handlers
 function invDragOver(e){e.preventDefault();e.currentTarget.classList.add('dragover');}
 function invDragLeave(e){e.currentTarget.classList.remove('dragover');}
 function invDrop(e){
@@ -1114,7 +1112,6 @@ function processInvFiles(files){
 }
 
 function uploadInvoiceFile(file,itemId){
-  // Get current repair context from editId or the id about to be created
   const r=editId?repairs.find(r=>r.id===editId):null;
   const vanId=(r?r.vanId:document.getElementById('m-vid').value.trim())||'Unknown';
   const date=(r?r.date:document.getElementById('m-date').value)||new Date().toISOString().slice(0,10);
@@ -1147,7 +1144,6 @@ function uploadInvoiceFile(file,itemId){
         try{
           const d=JSON.parse(txt);
           if(d.ok&&d.url){
-            // Attach URL to current or pending repair
             if(editId){
               const rep=repairs.find(r=>r.id===editId);
               if(rep){
@@ -1156,7 +1152,6 @@ function uploadInvoiceFile(file,itemId){
                 saveL();renderModalInvoices(rep.invoiceUrls);sched();
               }
             } else {
-              // Store pending for after save
               if(!window._pendingInvoices)window._pendingInvoices=[];
               window._pendingInvoices.push({name:file.name,url:d.url,driveId:d.fileId});
             }
@@ -1197,7 +1192,9 @@ function viewInvoices(id){
   document.getElementById('inv-modal').classList.add('open');
 }
 
-
+// ══════════════════════════════════════════════════════════════
+// ARCHIVES
+// ══════════════════════════════════════════════════════════════
 function loadYearData(){try{const a=localStorage.getItem('vce_arch');if(a)archive=JSON.parse(a);}catch(e){}}
 function saveYearData(){try{localStorage.setItem('vce_arch',JSON.stringify(archive));}catch(e){}}
 function archiveYear(){
@@ -1295,16 +1292,10 @@ document.getElementById('report-modal').addEventListener('click',e=>{if(e.target
 document.getElementById('import-modal').addEventListener('click',e=>{if(e.target===document.getElementById('import-modal'))document.getElementById('import-modal').classList.remove('open');});
 document.getElementById('inv-modal').addEventListener('click',e=>{if(e.target===document.getElementById('inv-modal'))document.getElementById('inv-modal').classList.remove('open');});
 
-// STARTUP — localStorage is source of truth, sheet is backup
 loadYearData();
-loadL(); // load localStorage first — this is our data
-
-// Show dashboard immediately with whatever we have
+loadL();
 document.getElementById('page-dashboard').classList.add('active');
 renderAll();
-
-// Then connect to sheet silently — only overwrite if sheet is empty (first run)
-// Never overwrite local data on auto-load
 $el('bi',BUDGET,'value');
 sp('busy','Connecting…');
 setTimeout(function(){loadSheets(false);},500);
